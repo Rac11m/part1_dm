@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableView, QLabel, QMessageBox, QFileDialog, QDialog, QFormLayout, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableView, QLabel, QMessageBox, QFileDialog, QDialog, QFormLayout, QLineEdit, QComboBox, QTableWidgetItem, QInputDialog
 from PyQt5.QtCore import QAbstractTableModel, Qt
 import matplotlib.pyplot as plt
 
@@ -64,13 +64,51 @@ class DataApp(QMainWindow):
         # Analysis menu
         analysis_menu = menubar.addMenu('Analysis')
         stats_action = QAction('Statistics', self)
-        boxplot_action = QAction('Boxplots', self)
-        histogram_action = QAction('Histograms', self)
-        scatter_action = QAction('Scatter Plots', self)
         analysis_menu.addAction(stats_action)
-        analysis_menu.addAction(boxplot_action)
-        analysis_menu.addAction(histogram_action)
-        analysis_menu.addAction(scatter_action)
+        # analysis_menu.addAction(boxplot_action)
+        # analysis_menu.addAction(histogram_action)
+        # analysis_menu.addAction(scatter_action)
+
+        # Data Cleaning menu
+        data_cleaning_menu = menubar.addMenu('Data Cleaning')
+        handle_outliers_action = QAction('Handle Outliers', self)
+        data_cleaning_menu.addAction(handle_outliers_action)
+        handle_missing_action = QAction("Handle Missing Values", self)
+        data_cleaning_menu.addAction(handle_missing_action)
+
+        handle_outliers_action.triggered.connect(self.open_outliers_dialog)
+        handle_missing_action.triggered.connect(self.open_missing_values_dialog)
+
+        # Normalization menu
+        normalization_menu = menubar.addMenu('Normalization')
+        minmax_action = QAction('Min-Max Normalization', self)
+        zscore_action = QAction('Z-score Normalization', self)
+        normalization_menu.addAction(minmax_action)
+        normalization_menu.addAction(zscore_action)
+
+        minmax_action.triggered.connect(self.open_minmax_dialog)
+        zscore_action.triggered.connect(self.open_zscore_dialog)
+
+        # Discretization menu
+        discretization_menu = menubar.addMenu('Discretization')
+        equal_frequency_action = QAction('Equal Frequency', self)
+        equal_width_action = QAction('Equal Width', self)
+        discretization_menu.addAction(equal_frequency_action)
+        discretization_menu.addAction(equal_width_action)
+
+        equal_frequency_action.triggered.connect(self.open_equal_frequency_dialog)
+        equal_width_action.triggered.connect(self.open_equal_width_dialog)
+
+        # Data Reduction menu
+        data_reduction_menu = menubar.addMenu('Data Reduction')
+        eliminate_horizontal_action = QAction('Eliminate Horizontal Redundancies', self)
+        eliminate_vertical_action = QAction('Eliminate Vertical Redundancies', self)
+        data_reduction_menu.addAction(eliminate_horizontal_action)
+        data_reduction_menu.addAction(eliminate_vertical_action)
+
+        eliminate_horizontal_action.triggered.connect(self.open_eliminate_horizontal_dialog)
+        eliminate_vertical_action.triggered.connect(self.open_eliminate_vertical_dialog)
+
 
         # Central widget to display content based on menu actions
         self.central_widget = QWidget()
@@ -96,9 +134,6 @@ class DataApp(QMainWindow):
         update_action.triggered.connect(self.open_update_delete_dialog)
         
         stats_action.triggered.connect(self.analyze_data)
-        boxplot_action.triggered.connect(self.construct_boxplot)
-        histogram_action.triggered.connect(self.construct_histogram)
-        scatter_action.triggered.connect(self.create_scatter_plot)
 
     def analyze_data(self):
         if self.df.empty:
@@ -107,22 +142,6 @@ class DataApp(QMainWindow):
         dialog = AnalysisDialog(self.df, self)
         dialog.exec_()
 
-    def construct_boxplot(self):
-        if self.df.empty:
-            QMessageBox.warning(self, "Warning", "No data loaded. Please import a CSV file first.")
-            return
-        # Similar to analyze_data but for boxplots
-
-    def construct_histogram(self):
-        if self.df.empty:
-            QMessageBox.warning(self, "Warning", "No data loaded. Please import a CSV file first.")
-            return
-        # Similar to analyze_data but for histograms
-
-    def create_scatter_plot(self):
-        if self.df.empty:
-            QMessageBox.warning(self, "Warning", "No data loaded. Please import a CSV file first.")
-            return
     def clear_layout(self):
         # Clear existing widgets in the layout
         while self.layout.count():
@@ -204,6 +223,495 @@ class DataApp(QMainWindow):
         model = PandasModel(self.df)  # Create a new model with the updated DataFrame
         self.data_table.setModel(model)  # Set the new model for the QTableView
 
+    def open_outliers_dialog(self):
+        dialog = OutliersDialog(self.df, self.update_dataframe, self)
+        dialog.exec_()
+
+    def open_missing_values_dialog(self):
+        dialog = MissingValuesDialog(self.df, self.update_dataframe, self)
+        dialog.exec_()   
+
+    def open_minmax_dialog(self):
+        dialog = MinMaxDialog(self.df, self.update_dataframe_normalize, self)
+        dialog.exec_()
+
+    def open_zscore_dialog(self):
+        dialog = ZScoreDialog(self.df, self.update_dataframe_normalize, self)
+        dialog.exec_()
+
+    def update_dataframe_normalize(self, column, normalized_data):
+        self.df[column + '_normalized'] = normalized_data  # Add the normalized data as a new column
+        model = PandasModel(self.df)  # Update the QTableView with the new DataFrame
+        self.data_table.setModel(model)  # Refresh the table with the updated model
+
+    def open_equal_frequency_dialog(self):
+        dialog = EqualFrequencyDialog(self.df, self.update_dataframe_discretized, self)
+        dialog.exec_()
+
+    def open_equal_width_dialog(self):
+        dialog = EqualWidthDialog(self.df, self.update_dataframe_discretized, self)
+        dialog.exec_()
+
+    def update_dataframe_discretized(self, column, discretized_data):
+        self.df[column + '_discretized'] = discretized_data  # Add the discretized data as a new column
+        model = PandasModel(self.df)  # Update the QTableView with the new DataFrame
+        self.data_table.setModel(model)  # Refresh the table with the updated model
+
+    def open_eliminate_horizontal_dialog(self):
+        dialog = EliminateHorizontalDialog(self.df, self.update_dataframe_reduce, self)
+        dialog.exec_()
+
+    def open_eliminate_vertical_dialog(self):
+        dialog = EliminateVerticalDialog(self.df, self.update_dataframe_reduce, self)
+        dialog.exec_()
+
+    def update_dataframe_reduce(self, reduced_data):
+        self.df = reduced_data  # For vertical elimination, update the main DataFrame
+        model = PandasModel(self.df)  # Update the QTableView with the new DataFrame
+        self.data_table.setModel(model)  # Refresh the table with the updated model
+
+
+
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QComboBox, QPushButton, QMessageBox
+
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit, QMessageBox
+
+
+
+class EliminateHorizontalDialog(QDialog):
+    def __init__(self, df, apply_reduction, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_reduction = apply_reduction
+
+        self.setWindowTitle("Eliminate Horizontal Redundancies")
+        self.setGeometry(100, 100, 300, 200)
+
+        layout = QVBoxLayout()
+
+        layout = QVBoxLayout()
+
+        # Apply button for vertical redundancy elimination
+        apply_button = QPushButton("Apply Elimination")
+        apply_button.clicked.connect(self.apply_horizontal_elimination)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+        
+    def eliminate_horizontal_redundancies(self, df):
+        return df.drop_duplicates()
+
+    def apply_horizontal_elimination(self):
+        reduced_data = self.eliminate_horizontal_redundancies(self.df)
+        self.apply_reduction(reduced_data)
+        self.accept()
+
+
+class EliminateVerticalDialog(QDialog):
+    def __init__(self, df, apply_reduction, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_reduction = apply_reduction
+
+        self.setWindowTitle("Eliminate Vertical Redundancies")
+        self.setGeometry(100, 100, 300, 200)
+
+        layout = QVBoxLayout()
+
+        # Apply button for vertical redundancy elimination
+        apply_button = QPushButton("Apply Elimination")
+        apply_button.clicked.connect(self.apply_vertical_elimination)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+
+    
+    def eliminate_vertical_redundancies(self, df):
+        return df.loc[:, df.nunique() > 1]
+
+
+    def apply_vertical_elimination(self):
+        reduced_data = self.eliminate_vertical_redundancies(self.df)
+        self.apply_reduction(reduced_data)  # No column for vertical elimination
+        self.accept()
+
+
+class EqualFrequencyDialog(QDialog):
+    def __init__(self, df, apply_discretization, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_discretization = apply_discretization
+
+        self.setWindowTitle("Equal Frequency Discretization")
+        self.setGeometry(100, 100, 300, 200)
+
+        layout = QVBoxLayout()
+
+        # Column selection
+        self.column_combo = QComboBox()
+        self.column_combo.addItems(self.df.columns)
+        layout.addWidget(QLabel("Select column to discretize:"))
+        layout.addWidget(self.column_combo)
+
+        # Bins input
+        self.bins_input = QLineEdit()
+        self.bins_input.setPlaceholderText("Enter number of bins")
+        layout.addWidget(QLabel("Number of Bins:"))
+        layout.addWidget(self.bins_input)
+
+        # Apply button
+        apply_button = QPushButton("Apply Discretization")
+        apply_button.clicked.connect(self.apply_equal_frequency)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+
+    def discritize_equal_frequency(self, df, column, bins):
+        discretized_column = pd.qcut(df[column], q=bins, labels=False, duplicates='drop')
+        return discretized_column
+
+    def apply_equal_frequency(self):
+        column = self.column_combo.currentText()
+        bins = self.bins_input.text()
+
+        # Validate input
+        try:
+            bins = int(bins)
+            if bins <= 0:
+                raise ValueError("Number of bins must be greater than 0.")
+        except ValueError as e:
+            QMessageBox.warning(self, "Input Error", f"Invalid input: {str(e)}")
+            return
+
+        discretized_data = self.discritize_equal_frequency(self.df, column, bins)
+        self.apply_discretization(column, discretized_data)
+        self.accept()
+
+class EqualWidthDialog(QDialog):
+    def __init__(self, df, apply_discretization, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_discretization = apply_discretization
+
+        self.setWindowTitle("Equal Width Discretization")
+        self.setGeometry(100, 100, 300, 200)
+
+        layout = QVBoxLayout()
+
+        # Column selection
+        self.column_combo = QComboBox()
+        self.column_combo.addItems(self.df.columns)
+        layout.addWidget(QLabel("Select column to discretize:"))
+        layout.addWidget(self.column_combo)
+
+        # Bins input
+        self.bins_input = QLineEdit()
+        self.bins_input.setPlaceholderText("Enter number of bins")
+        layout.addWidget(QLabel("Number of Bins:"))
+        layout.addWidget(self.bins_input)
+
+        # Apply button
+        apply_button = QPushButton("Apply Discretization")
+        apply_button.clicked.connect(self.apply_equal_width)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+
+    def discritize_equal_width(self, df, column, bins):
+        discretized_column = pd.cut(df[column], bins=bins, labels=False, duplicates='drop')
+        return discretized_column
+
+
+    def apply_equal_width(self):
+        column = self.column_combo.currentText()
+        bins = self.bins_input.text()
+
+        # Validate input
+        try:
+            bins = int(bins)
+            if bins <= 0:
+                raise ValueError("Number of bins must be greater than 0.")
+        except ValueError as e:
+            QMessageBox.warning(self, "Input Error", f"Invalid input: {str(e)}")
+            return
+
+        discretized_data = self.discritize_equal_width(self.df, column, bins)
+        self.apply_discretization(column, discretized_data)
+        self.accept()
+
+
+
+class MinMaxDialog(QDialog):
+    def __init__(self, df, apply_minmax, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_minmax = apply_minmax
+
+        self.setWindowTitle("Min-Max Normalization")
+        self.setGeometry(100, 100, 300, 250)  # Adjusted height for additional widgets
+        
+        layout = QVBoxLayout()
+
+        # Column selection
+        self.column_combo = QComboBox()
+        self.column_combo.addItems(self.df.columns)
+        layout.addWidget(QLabel("Select column to normalize:"))
+        layout.addWidget(self.column_combo)
+
+        # New Min and Max inputs
+        self.new_min_input = QLineEdit()
+        self.new_min_input.setPlaceholderText("Enter new min value (default 0)")
+        layout.addWidget(QLabel("New Min:"))
+        layout.addWidget(self.new_min_input)
+
+        self.new_max_input = QLineEdit()
+        self.new_max_input.setPlaceholderText("Enter new max value (default 1)")
+        layout.addWidget(QLabel("New Max:"))
+        layout.addWidget(self.new_max_input)
+
+        # Apply button
+        apply_button = QPushButton("Apply Normalization")
+        apply_button.clicked.connect(self.apply_minmax_normalization)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+
+    def minmax_normalization(self, df, column, new_min=0, new_max=1):
+        old_min = df[column].min()
+        old_max = df[column].max()
+
+        normalized_column = ((df[column] - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
+        return normalized_column
+
+    def apply_minmax_normalization(self):
+        column = self.column_combo.currentText()
+        new_min = self.new_min_input.text()
+        new_max = self.new_max_input.text()
+
+        # Validate input
+        try:
+            new_min = float(new_min) if new_min else 0  # Default to 0 if empty
+            new_max = float(new_max) if new_max else 1  # Default to 1 if empty
+            if new_min >= new_max:
+                raise ValueError("New Min must be less than New Max.")
+        except ValueError as e:
+            QMessageBox.warning(self, "Input Error", f"Invalid input: {str(e)}")
+            return
+        
+        normalized_data = self.minmax_normalization(self.df, column, new_min, new_max)
+        self.apply_minmax(column, normalized_data)
+        self.accept()
+
+from scipy.stats import zscore
+
+class ZScoreDialog(QDialog):
+    def __init__(self, df, apply_zscore, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.apply_zscore = apply_zscore
+
+        self.setWindowTitle("Z-Score Normalization")
+        self.setGeometry(100, 100, 300, 200)
+        
+        layout = QVBoxLayout()
+        
+        self.column_combo = QComboBox()
+        self.column_combo.addItems(self.df.columns)
+        layout.addWidget(QLabel("Select column to normalize:"))
+        layout.addWidget(self.column_combo)
+
+        apply_button = QPushButton("Apply Normalization")
+        apply_button.clicked.connect(self.apply_zscore_normalization)
+        layout.addWidget(apply_button)
+
+        self.setLayout(layout)
+
+
+
+    def zscore_normalization(self, df, column):
+        normalized_column = zscore(df[column])
+        return normalized_column
+
+
+    def apply_zscore_normalization(self):
+        column = self.column_combo.currentText()
+        normalized_data = self.zscore_normalization(self.df, column)
+        self.apply_zscore(column, normalized_data)
+        self.accept()
+
+
+class OutliersDialog(QDialog):
+    def __init__(self, df, update_callback, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.update_callback = update_callback
+
+        self.setWindowTitle("Handle Outliers")
+        self.setGeometry(300, 300, 400, 300)
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(QLabel("Select the method for handling outliers:"))
+        self.method_selector = QComboBox()
+        self.method_selector.addItems(["IQR Method", "Z-Score Method"])
+        layout.addWidget(self.method_selector)
+
+        self.column_selector = QComboBox()
+        self.column_selector.addItems(df.columns)
+        layout.addWidget(QLabel("Select column for outlier removal:"))
+        layout.addWidget(self.column_selector)
+
+        self.process_button = QPushButton("Process")
+        self.process_button.clicked.connect(self.handle_outliers)
+        layout.addWidget(self.process_button)
+
+    def handle_outliers(self):
+        selected_method = self.method_selector.currentText()
+        column = self.column_selector.currentText()
+
+        if selected_method == "IQR Method":
+            new_df = self.remove_outliers_iqr(self.df, column)
+            QMessageBox.information(self, "Info", "IQR Outliers method applied.")
+        
+        elif selected_method == "Z-Score Method":
+            threshold, ok = QInputDialog.getDouble(self, "Input Threshold", "Enter the Z-Score threshold (default is 3):", value=3.0)
+            if ok:
+                new_df = self.remove_outliers_zscore(self.df, column, threshold)
+                QMessageBox.information(self, "Info", "Z-Score Outliers method applied.")
+        
+        # Call the update callback to refresh the main DataFrame in the UI
+        self.update_callback(new_df)
+        self.close()
+
+    def remove_outliers_iqr(self, df, column):
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        
+        return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+    def remove_outliers_zscore(self, df, column, threshold=3):
+        mean = df[column].mean()
+        std_dev = df[column].std()
+        z_scores = (df[column] - mean) / std_dev
+        return df[abs(z_scores) <= threshold]
+
+class MissingValuesDialog(QDialog):
+    def __init__(self, df, update_callback, parent=None):
+        super().__init__(parent)
+        self.df = df
+        self.update_callback = update_callback
+
+        self.setWindowTitle("Handle Missing Values")
+        self.setGeometry(300, 300, 400, 300)
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(QLabel("Select the method for handling missing values:"))
+        self.method_selector = QComboBox()
+        self.method_selector.addItems([
+            "Drop Rows with Any NA", "Drop Rows with All NA", "Drop Rows with Threshold",
+            "Drop Columns with Any NA", "Drop Columns with All NA",
+            "Fill with Value", "Fill with Mean", "Fill with Median", 
+            "Fill Forward", "Fill Backward"
+        ])
+        layout.addWidget(self.method_selector)
+
+        self.process_button = QPushButton("Process")
+        self.process_button.clicked.connect(self.handle_missing_values)
+        layout.addWidget(self.process_button)
+
+    def handle_missing_values(self):
+        selected_method = self.method_selector.currentText()
+
+        if selected_method == "Drop Rows with Any NA":
+            new_df = self.drop_rows_na(self.df)
+            QMessageBox.information(self, "Info", "Rows with any NA dropped.")
+        
+        elif selected_method == "Drop Rows with All NA":
+            new_df = self.drop_rows_all_na(self.df)
+            QMessageBox.information(self, "Info", "Rows with all NA dropped.")
+        
+        elif selected_method == "Drop Rows with Threshold":
+            threshold, ok = QInputDialog.getInt(self, "Input Threshold", "Enter the threshold value:")
+            if ok:
+                new_df = self.drop_rows_thresh_na(self.df, threshold)
+                QMessageBox.information(self, "Info", f"Rows with less than {threshold} non-NA values dropped.")
+
+        elif selected_method == "Drop Columns with Any NA":
+            new_df = self.drop_columns_na(self.df)
+            QMessageBox.information(self, "Info", "Columns with any NA dropped.")
+        
+        elif selected_method == "Drop Columns with All NA":
+            new_df = self.drop_columns_all_na(self.df)
+            QMessageBox.information(self, "Info", "Columns with all NA dropped.")
+
+        elif selected_method == "Fill with Value":
+            value, ok = QInputDialog.getText(self, "Input Value", "Enter the value to fill missing data with:")
+            if ok:
+                new_df = self.fill_na(self.df, value)
+                QMessageBox.information(self, "Info", "Missing values filled with the given value.")
+
+        elif selected_method == "Fill Forward":
+            limit, ok = QInputDialog.getInt(self, "Input Limit", "Enter the limit for forward fill (optional, press OK for no limit):", value=0, min=0)
+            if ok:
+                new_df = self.fill_forward_na(self.df, limit if limit > 0 else None)
+                QMessageBox.information(self, "Info", "Missing values forward filled.")
+
+        elif selected_method == "Fill Backward":
+            limit, ok = QInputDialog.getInt(self, "Input Limit", "Enter the limit for backward fill (optional, press OK for no limit):", value=0, min=0)
+            if ok:
+                new_df = self.fill_backward_na(self.df, limit if limit > 0 else None)
+                QMessageBox.information(self, "Info", "Missing values backward filled.")
+
+        elif selected_method == "Fill with Mean":
+            new_df = self.fill_mean_na(self.df)
+            QMessageBox.information(self, "Info", "Missing values filled with mean.")
+
+        elif selected_method == "Fill with Median":
+            new_df = self.fill_median_na(self.df)
+            QMessageBox.information(self, "Info", "Missing values filled with median.")
+
+        # Call the update callback to refresh the main DataFrame in the UI
+        self.update_callback(new_df)
+        self.close()
+
+    # Implementations for missing value handling methods
+    def drop_rows_na(self, df):
+        return df.dropna()
+
+    def drop_rows_all_na(self, df):
+        return df.dropna(how='all')
+
+    def drop_rows_thresh_na(self, df, th):
+        return df.dropna(thresh=th)
+
+    def drop_columns_na(self, df):
+        return df.dropna(axis="columns")
+
+    def drop_columns_all_na(self, df):
+        return df.dropna(axis="columns", how='all')
+
+    def fill_na(self, df, value):
+        return df.fillna(value)
+
+    def fill_forward_na(self, df, limit=None):
+        return df.fillna(method="ffill", limit=limit)
+
+    def fill_backward_na(self, df, limit=None):
+        return df.fillna(method="bfill", limit=limit)
+
+    def fill_mean_na(self, df):
+        for column in df.columns:
+            if pd.api.types.is_numeric_dtype(df[column]):
+                df[column].fillna(df[column].mean(), inplace=True)
+        return df
+
+    def fill_median_na(self, df):
+        for column in df.columns:
+            if pd.api.types.is_numeric_dtype(df[column]):
+                df[column].fillna(df[column].median(), inplace=True)
+        return df
 
 
 class AnalysisDialog(QDialog):
@@ -360,6 +868,7 @@ class AnalysisDialog(QDialog):
 class ScatterPlotDialog(QDialog):
     def __init__(self, df, parent=None):
         super().__init__(parent)
+        
         self.df = df
         self.setWindowTitle("Select Columns for Scatter Plot")
         self.setGeometry(100, 100, 400, 200)
@@ -379,33 +888,34 @@ class ScatterPlotDialog(QDialog):
         self.scatter_button.clicked.connect(self.create_scatter_plot)
         self.layout.addWidget(self.scatter_button)
 
+    
+    def scatter_plot(self, df,column_x, column_y):
+        data_to_plot = df[[column_x, column_y]].dropna()
 
+        plt.figure(figsize=(10, 6))
+        plt.scatter(df[column_x], df[column_y], alpha=0.6)
+
+        correlation = df[column_x].corr(df[column_y])
+
+
+        plt.title(f'Scatter Plot: {column_x} vs {column_y}\nCorrelation: {correlation:.2f}')
+        plt.xlabel(column_x)
+        plt.ylabel(column_y)
+
+        sns.regplot(x=column_x, y=column_y, data=df, scatter=False, color='red', line_kws={"linewidth": 1})
+
+        plt.grid()
+        plt.show()
 
 
     def create_scatter_plot(self):
         column_x = self.column_x_selector.currentText()
         column_y = self.column_y_selector.currentText()
-        scatter_plot(self.df, column_x, column_y)  # Assuming scatter_plot function is defined globally
-        self.close()
-
-def scatter_plot(df,column_x, column_y):
-    data_to_plot = df[[column_x, column_y]].dropna()
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(df[column_x], df[column_y], alpha=0.6)
-
-    correlation = df[column_x].corr(df[column_y])
-
-
-    plt.title(f'Scatter Plot: {column_x} vs {column_y}\nCorrelation: {correlation:.2f}')
-    plt.xlabel(column_x)
-    plt.ylabel(column_y)
-
-    sns.regplot(x=column_x, y=column_y, data=df, scatter=False, color='red', line_kws={"linewidth": 1})
-
-    plt.grid()
-    plt.show() 
-    
+        if (self.df[column_x].dtype and self.df[column_y].dtype) in [np.float64, np.int64]:
+            self.scatter_plot(self.df, column_x, column_y)  # Assuming scatter_plot function is defined globally
+            self.close()
+        else:
+            QMessageBox.warning(self, "Warning", "Selected column is not numeric.")
 
 
 class UpdateDeleteDialog(QDialog):
