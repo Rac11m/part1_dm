@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>632</height>
+    <width>968</width>
+    <height>585</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,337 +58,465 @@ QLabel {
    <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="labelQuery">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>20</y>
-      <width>61</width>
-      <height>41</height>
+      <x>20</x>
+      <y>30</y>
+      <width>911</width>
+      <height>481</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-      <underline>false</underline>
-      <kerning>false</kerning>
-     </font>
+    <property name="currentIndex">
+     <number>1</number>
     </property>
-    <property name="text">
-     <string>Query</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="search_button">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>20</y>
-      <width>121</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::WheelFocus</enum>
-    </property>
-    <property name="text">
-     <string>Search</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="query_input">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>20</y>
-      <width>511</width>
-      <height>51</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelQuery_2">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>100</y>
-      <width>81</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-      <underline>false</underline>
-      <kerning>false</kerning>
-     </font>
-    </property>
-    <property name="text">
-     <string>Processing</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelQuery_3">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>210</y>
-      <width>71</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-      <underline>false</underline>
-      <kerning>false</kerning>
-     </font>
-    </property>
-    <property name="text">
-     <string>Results</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelQuery_4">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>100</y>
-      <width>71</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>-1</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-      <underline>false</underline>
-      <kerning>false</kerning>
-     </font>
-    </property>
-    <property name="text">
-     <string>Index</string>
-    </property>
-   </widget>
-   <widget class="QTableWidget" name="tableWidget">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>250</y>
-      <width>591</width>
-      <height>321</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QFrame" name="horizontalFrame">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>140</y>
-      <width>321</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QFrame {
-	background-color: rgb(227, 227, 227);
-	padding-left: 4px;
-	padding-right: 4px;
-}</string>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
-     <item>
-      <widget class="QLabel" name="label2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>9</pointsize>
-         <weight>50</weight>
-         <italic>false</italic>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;
-color: rgb(0, 0, 0);</string>
+    <widget class="QWidget" name="DataManipulation">
+     <attribute name="title">
+      <string>Data Manipulation</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>911</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QPushButton" name="pushButton">
+       <property name="geometry">
+        <rect>
+         <x>410</x>
+         <y>20</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
        </property>
        <property name="text">
-        <string>Token</string>
+        <string>Import</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="combo_token">
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
+      <widget class="QTableView" name="tableView">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>881</width>
+         <height>361</height>
+        </rect>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <item>
-        <property name="text">
-         <string>Split</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Regex</string>
-        </property>
-       </item>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label2_2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>9</pointsize>
-         <weight>50</weight>
-         <italic>false</italic>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;
-color: rgb(0, 0, 0);</string>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Analysis">
+     <attribute name="title">
+      <string>Analysis</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>911</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>40</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
        </property>
        <property name="text">
-        <string>Stemmer</string>
+        <string>PushButton</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="combo_stemmer">
-       <item>
-        <property name="text">
-         <string>Without</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Porter</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Lancaster</string>
-        </property>
-       </item>
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>40</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
       </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QFrame" name="horizontalFrame_2">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>140</y>
-      <width>371</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QFrame {
-	background-color: rgb(227, 227, 227);
-	padding-left: 4px;
-	padding-right: 4px;
-}</string>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
-     <item>
+      <widget class="QPushButton" name="pushButton_4">
+       <property name="geometry">
+        <rect>
+         <x>420</x>
+         <y>40</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_5">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>40</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_6">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>40</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QListWidget" name="listWidget">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>150</y>
+         <width>256</width>
+         <height>192</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Reduction">
+     <attribute name="title">
+      <string>Reduction</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>911</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QPushButton" name="pushButton_7">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>50</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_8">
+       <property name="geometry">
+        <rect>
+         <x>270</x>
+         <y>50</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
       <widget class="QCheckBox" name="checkBox">
+       <property name="geometry">
+        <rect>
+         <x>260</x>
+         <y>150</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
+       </property>
        <property name="text">
-        <string/>
+        <string>CheckBox</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QCheckBox" name="checkBox_2">
+       <property name="geometry">
+        <rect>
+         <x>380</x>
+         <y>150</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radio_docs_per_term">
        <property name="text">
-        <string>DOCS per TERM</string>
+        <string>CheckBox</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="radio_term_per_docs">
+      <widget class="QCheckBox" name="checkBox_3">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>110</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
+       </property>
        <property name="text">
-        <string>TERM per DOCS</string>
+        <string>CheckBox</string>
        </property>
       </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QLabel" name="vocabulary_label">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>590</y>
-      <width>271</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="size_label">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>590</y>
-      <width>271</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
+      <widget class="QCheckBox" name="checkBox_4">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>100</y>
+         <width>101</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>CheckBox</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Preprocessing">
+     <attribute name="title">
+      <string>Preprocessing</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>911</width>
+        <height>461</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QPushButton" name="pushButton_9">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>90</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_10">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>80</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_11">
+       <property name="geometry">
+        <rect>
+         <x>450</x>
+         <y>70</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_12">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>50</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox">
+       <property name="geometry">
+        <rect>
+         <x>150</x>
+         <y>150</y>
+         <width>69</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </widget>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizeGripEnabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>968</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionImport"/>
+    <addaction name="actionVisualize"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <widget class="QMenu" name="menuData_Manipulation">
+    <property name="title">
+     <string>Data Manipulation</string>
+    </property>
+    <addaction name="actionUpdate_Delete_Instance"/>
+   </widget>
+   <widget class="QMenu" name="menuAnalysis">
+    <property name="title">
+     <string>Analysis</string>
+    </property>
+    <widget class="QMenu" name="menuPlots">
+     <property name="title">
+      <string>Plots</string>
+     </property>
+     <addaction name="actionBoxplots"/>
+     <addaction name="actionHistograms"/>
+     <addaction name="actionScatter_plots"/>
+    </widget>
+    <addaction name="actionStatics"/>
+    <addaction name="menuPlots"/>
+   </widget>
+   <widget class="QMenu" name="menuReducion">
+    <property name="title">
+     <string>Reducion</string>
+    </property>
+    <addaction name="actionAggregation"/>
+    <addaction name="actionDiscretization"/>
+   </widget>
+   <widget class="QMenu" name="menuPreprocessing">
+    <property name="title">
+     <string>Preprocessing</string>
+    </property>
+    <addaction name="actionHandle_Missing"/>
+    <addaction name="actionHandle_Outliers"/>
+    <addaction name="actionNormalization"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuData_Manipulation"/>
+   <addaction name="menuAnalysis"/>
+   <addaction name="menuReducion"/>
+   <addaction name="menuPreprocessing"/>
+  </widget>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionVisualize">
+   <property name="text">
+    <string>Visualize</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionUpdate_Delete_Instance">
+   <property name="text">
+    <string>Update/Delete Instance</string>
+   </property>
+  </action>
+  <action name="actionStatics">
+   <property name="text">
+    <string>Statistics</string>
+   </property>
+  </action>
+  <action name="actionBoxplots">
+   <property name="text">
+    <string>Boxplots</string>
+   </property>
+  </action>
+  <action name="actionHistograms">
+   <property name="text">
+    <string>Histograms</string>
+   </property>
+  </action>
+  <action name="actionScatter_plots">
+   <property name="text">
+    <string>Scatter plots</string>
+   </property>
+  </action>
+  <action name="actionAggregation">
+   <property name="text">
+    <string>Aggregation</string>
+   </property>
+  </action>
+  <action name="actionDiscretization">
+   <property name="text">
+    <string>Discretization</string>
+   </property>
+  </action>
+  <action name="actionHandle_Missing">
+   <property name="text">
+    <string>Handle Missing values</string>
+   </property>
+  </action>
+  <action name="actionHandle_Outliers">
+   <property name="text">
+    <string>Handle Outliers</string>
+   </property>
+  </action>
+  <action name="actionNormalization">
+   <property name="text">
+    <string>Normalization</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
