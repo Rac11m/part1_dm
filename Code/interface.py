@@ -5,6 +5,7 @@ import seaborn as sns
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTableView, QLabel, QMessageBox, QFileDialog, QDialog, QFormLayout, QLineEdit, QComboBox, QTableWidgetItem, QInputDialog
 from PyQt5.QtCore import QAbstractTableModel, Qt
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsRegressor
 
 class PandasModel(QAbstractTableModel):
     def __init__(self, df=pd.DataFrame(), parent=None):
@@ -64,7 +65,9 @@ class DataApp(QMainWindow):
         # Analysis menu
         analysis_menu = menubar.addMenu('Analysis')
         stats_action = QAction('Statistics', self)
+        stats_all = QAction('All', self)
         analysis_menu.addAction(stats_action)
+        analysis_menu.addAction(stats_all)
         # analysis_menu.addAction(boxplot_action)
         # analysis_menu.addAction(histogram_action)
         # analysis_menu.addAction(scatter_action)
@@ -105,6 +108,10 @@ class DataApp(QMainWindow):
         eliminate_vertical_action = QAction('Eliminate Vertical Redundancies', self)
         data_reduction_menu.addAction(eliminate_horizontal_action)
         data_reduction_menu.addAction(eliminate_vertical_action)
+
+        #all plot
+        stats_all.triggered.connect(self.visualize_unique)
+
 
         eliminate_horizontal_action.triggered.connect(self.open_eliminate_horizontal_dialog)
         eliminate_vertical_action.triggered.connect(self.open_eliminate_vertical_dialog)
@@ -191,6 +198,92 @@ class DataApp(QMainWindow):
         # Create a new figure
         self.figure = plt.figure(figsize=(10, 6))
         self.df.hist(bins=30, figsize=(10, 10), grid=False)
+        plt.tight_layout()
+        plt.show()
+
+    def missing_att(self,attribute, df):
+        total_count = df[attribute].shape[0]
+
+        return df[attribute].isnull().sum(), (df[attribute].isnull().sum() / total_count) * 100
+
+
+    def unique_att(self, attribute, df):
+        return df[attribute].nunique()
+    def visualize_unique(self):
+        if self.df.empty:
+            QMessageBox.warning(self, "Warning", "No data loaded. Please import a CSV file first.")
+            return
+        
+                # Close the previous figure if it exists
+        if self.figure:
+            plt.close(self.figure)
+        miss_uniq = {}
+
+        for column in self.df.columns:
+            miss = self.missing_att(column, self.df)
+            unique = self.unique_att(column, self.df)
+            miss_uniq[column] = {
+            'Missing values count': miss[0],
+            'Missing values percentage': miss[1],
+            'Unique values count': unique
+         }
+        columns_numeric_to_analyze = [column for column in self.df.columns if pd.api.types.is_numeric_dtype(self.df[column])]
+        dispersion_measures = {}
+        for col in columns_numeric_to_analyze:
+            q1 = self.df[col].quantile(q=0.25)
+            q3 = self.df[col].quantile(q=0.75)
+            iqr = q3 - q1
+            iqr_1_5 = 1.5 * iqr
+
+            lower_bound = q1 - iqr_1_5
+            upper_bound = q3 + iqr_1_5
+
+            outliers = self.df[(self.df[col] < lower_bound) | (self.df[col] > upper_bound)][col]
+            num_outliers = outliers.count()
+            dispersion_measures[col] = {
+            'Number of Outliers': num_outliers
+            }
+        dispersion_df = pd.DataFrame(dispersion_measures).T
+        missuniq_df = pd.DataFrame(miss_uniq).T
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=missuniq_df.index, y=missuniq_df['Missing values count'], color='salmon')
+        plt.title("Nombre de Valeurs Manquantes par Attribut", fontsize=14)
+        plt.xlabel("Attributs", fontsize=12)
+        plt.ylabel("Nombre de Valeurs Manquantes", fontsize=12)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=missuniq_df.index, y=missuniq_df['Missing values percentage'], color='lightcoral')
+        plt.title("Pourcentage de Valeurs Manquantes par Attribut", fontsize=14)
+        plt.xlabel("Attributs", fontsize=12)
+        plt.ylabel("Pourcentage de Valeurs Manquantes (%)", fontsize=12)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=missuniq_df.index, y=missuniq_df['Unique values count'], color='lightgreen')
+        plt.title("Nombre de Valeurs Uniques par Attribut", fontsize=14)
+        plt.xlabel("Attributs", fontsize=12)
+        plt.ylabel("Nombre de Valeurs Uniques", fontsize=12)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+        outliers_count = dispersion_df['Number of Outliers']
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(outliers_count.index, outliers_count.values, color='skyblue')
+
+
+        plt.title("Nombre d'Outliers par Attribut", fontsize=14)
+        plt.xlabel("Attributs", fontsize=12)
+        plt.ylabel("Nombre d'Outliers", fontsize=12)
+
+        plt.xticks(rotation=90)
+
         plt.tight_layout()
         plt.show()
 
@@ -552,7 +645,7 @@ class OutliersDialog(QDialog):
 
         layout.addWidget(QLabel("Select the method for handling outliers:"))
         self.method_selector = QComboBox()
-        self.method_selector.addItems(["IQR Method", "Z-Score Method"])
+        self.method_selector.addItems(["IQR Method", "Z-Score Method",  "Mean Replacement", "Median Replacement", "KNN Replacement"])
         layout.addWidget(self.method_selector)
 
         self.column_selector = QComboBox()
@@ -577,6 +670,21 @@ class OutliersDialog(QDialog):
             if ok:
                 new_df = self.remove_outliers_zscore(self.df, column, threshold)
                 QMessageBox.information(self, "Info", "Z-Score Outliers method applied.")
+        #elif selected_method == "Mean Replacement":
+        elif selected_method == 'Mean Replacement':
+            new_df = self.replace_outliers_mean(self.df, column)
+            QMessageBox.information(self, "Info", "Mean Replacement method applied.")
+        elif selected_method == "Median Replacement":
+            new_df = self.replace_outliers_median(self.df, column)
+            QMessageBox.information(self, "Info", "Median Replacement method applied.")
+        elif selected_method == "KNN Replacement":
+            k, ok = QInputDialog.getDouble(self, "Input nb neighbour", "Enter the nomber of neighbour  (default is 5):", value=5)
+            if ok:
+                new_df = self.replace_outliers_knn(self.df, column, int(k))
+                QMessageBox.information(self, "Info", "KNN Replacement method applied.")
+
+
+
         
         # Call the update callback to refresh the main DataFrame in the UI
         self.update_callback(new_df)
@@ -596,6 +704,53 @@ class OutliersDialog(QDialog):
         std_dev = df[column].std()
         z_scores = (df[column] - mean) / std_dev
         return df[abs(z_scores) <= threshold]
+    
+    def replace_outliers_mean(self, df, column):
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        mean_value = df[column].mean() 
+        df[column] = df[column].apply(lambda x: mean_value if x < lower_bound or x > upper_bound else x)
+        return df
+    
+    
+    def replace_outliers_median(self, df, column):
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        median_value = df[column].median()
+
+        df[column] = df[column].apply(lambda x: median_value if x < lower_bound or x > upper_bound else x)
+        return df
+
+    def replace_outliers_knn(self, df, column, nb_neighbors=5):
+        Q1 = df[column].quantile(0.25)
+        q3 = df[column].quantile(0.75)
+        iqr = q3 - Q1
+        lower_bound = Q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        outliers = df[(df[column] < lower_bound) | (df[column] > upper_bound)]
+        normal_data = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+        if outliers.empty:
+            return df
+    
+        featurs = [col for col in df.columns if col != column]
+        X_train = normal_data[featurs]
+        y_train = normal_data[column]
+    
+        X_outliers = outliers[featurs]
+
+        knn = KNeighborsRegressor(n_neighbors=nb_neighbors)
+        knn.fit(X_train, y_train)
+        predicated_values = knn.predict(X_outliers)
+        df.loc[X_outliers.index, column] = predicated_values
+        return df
 
 class MissingValuesDialog(QDialog):
     def __init__(self, df, update_callback, parent=None):
