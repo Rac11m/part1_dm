@@ -234,6 +234,7 @@ class DataApp(QMainWindow):
             q3 = self.df[col].quantile(q=0.75)
             iqr = q3 - q1
             iqr_1_5 = 1.5 * iqr
+            variance = self.df[col].var()
 
             lower_bound = q1 - iqr_1_5
             upper_bound = q3 + iqr_1_5
@@ -241,7 +242,8 @@ class DataApp(QMainWindow):
             outliers = self.df[(self.df[col] < lower_bound) | (self.df[col] > upper_bound)][col]
             num_outliers = outliers.count()
             dispersion_measures[col] = {
-            'Number of Outliers': num_outliers
+            'Number of Outliers': num_outliers,
+            'Variance': variance
             }
         dispersion_df = pd.DataFrame(dispersion_measures).T
         missuniq_df = pd.DataFrame(miss_uniq).T
@@ -260,6 +262,15 @@ class DataApp(QMainWindow):
         plt.xlabel("Attributs", fontsize=12)
         plt.ylabel("Pourcentage de Valeurs Manquantes (%)", fontsize=12)
         plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+        corelation_matrix = self.df[columns_numeric_to_analyze].corr()
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(corelation_matrix, annot=True, fmt=".2f", cmap="coolwarm", cbar=True, square=True, linewidths=0.5)
+        plt.title("Matrice de Corrélation entre Attributs Numériques", fontsize=14)
+        plt.xticks(rotation=45, ha='right')
+        plt.yticks(rotation=0)
         plt.tight_layout()
         plt.show()
 
@@ -284,6 +295,39 @@ class DataApp(QMainWindow):
 
         plt.xticks(rotation=90)
 
+        plt.tight_layout()
+        plt.show()
+
+
+        variances = dispersion_df['Variance']
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(variances.index, variances.values, color='skyblue')
+
+
+        plt.title("Variance par Attribut", fontsize=14)
+        plt.xlabel("Attributs", fontsize=12)
+        plt.ylabel("Variances", fontsize=12)
+
+        plt.xticks(rotation=90)
+
+        plt.tight_layout()
+        plt.show()
+        outliers_normalized = (pd.Series(dispersion_df['Number of Outliers'])-pd.Series(dispersion_df['Number of Outliers']).min())/(pd.Series(dispersion_df['Number of Outliers']).max()-pd.Series(dispersion_df['Number of Outliers']).min())
+        variances_normalized = (variances-variances.min())/(variances.max()-variances.min())
+        corrlation_normalized = (missuniq_df["Unique values count"]-missuniq_df['Unique values count'].min())/(missuniq_df["Unique values count"].max()-missuniq_df["Unique values count"].min())
+        combined_scores = 0.1*variances_normalized + 0.4 * corrlation_normalized+ 0.5*outliers_normalized
+        best_col = combined_scores.idxmax()
+
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=combined_scores.index, y=combined_scores.values, palette='coolwarm')
+        plt.title("Score de pertinance des attributs", fontsize=14)
+        plt.xlabel('Attributs', fontsize=12)
+        plt.ylabel('Score', fontsize=12)
+
+        plt.bar(best_col, combined_scores[best_col], color='green', label='Best Attribute')
+        plt.legend()
+        plt.xticks(rotation=90)
         plt.tight_layout()
         plt.show()
 
@@ -672,10 +716,10 @@ class OutliersDialog(QDialog):
                 QMessageBox.information(self, "Info", "Z-Score Outliers method applied.")
         #elif selected_method == "Mean Replacement":
         elif selected_method == 'Mean Replacement':
-            new_df = self.replace_outliers_mean(self.df, column)
+            new_df = self.replace_outliers_mean(self.df)
             QMessageBox.information(self, "Info", "Mean Replacement method applied.")
         elif selected_method == "Median Replacement":
-            new_df = self.replace_outliers_median(self.df, column)
+            new_df = self.replace_outliers_median(self.df)
             QMessageBox.information(self, "Info", "Median Replacement method applied.")
         elif selected_method == "KNN Replacement":
             k, ok = QInputDialog.getDouble(self, "Input nb neighbour", "Enter the nomber of neighbour  (default is 5):", value=5)
@@ -705,28 +749,32 @@ class OutliersDialog(QDialog):
         z_scores = (df[column] - mean) / std_dev
         return df[abs(z_scores) <= threshold]
     
-    def replace_outliers_mean(self, df, column):
-        Q1 = df[column].quantile(0.25)
-        Q3 = df[column].quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
+    def replace_outliers_mean(self, df):
+        numeric_columns = [col for col in df.select_dtypes(include=[np.number]).columns if col not in ['lat', 'lon']]
+        for column in numeric_columns:
+            Q1 = df[column].quantile(0.25)
+            Q3 = df[column].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
 
-        mean_value = df[column].mean() 
-        df[column] = df[column].apply(lambda x: mean_value if x < lower_bound or x > upper_bound else x)
+            mean_value = df[column].mean() 
+            df[column] = df[column].apply(lambda x: mean_value if x < lower_bound or x > upper_bound else x)
         return df
     
     
-    def replace_outliers_median(self, df, column):
-        Q1 = df[column].quantile(0.25)
-        Q3 = df[column].quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
+    def replace_outliers_median(self, df):
+        numeric_columns = [col for col in df.select_dtypes(include=[np.number]).columns if col not in ['lat', 'lon']]
+        for column in numeric_columns:
+            Q1 = df[column].quantile(0.25)
+            Q3 = df[column].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
 
-        median_value = df[column].median()
+            median_value = df[column].median()
 
-        df[column] = df[column].apply(lambda x: median_value if x < lower_bound or x > upper_bound else x)
+            df[column] = df[column].apply(lambda x: median_value if x < lower_bound or x > upper_bound else x)
         return df
 
     def replace_outliers_knn(self, df, column, nb_neighbors=5):
